@@ -1,0 +1,16 @@
+# Terraform state — never commit
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+ 
+# Variable files containing secrets
+terraform.tfvars
+*.tfvars
+ 
+# Crash logs
+crash.log
+crash.*.log
+ 
+# Generated plan files
+*.tfplan
