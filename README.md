@@ -4,7 +4,7 @@
 
 *This project covers the automated cloud deployment of an Active Directory environment. To see the foundational, on-premises manual configuration that preceded this automation, check out* [Active Directory Home Lab: Windows Server 2025](https://github.com/Dane139/ad-home-lab)
 
-## 🛠️ Implementation Overview
+## Implementation Overview
 This repository contains the Infrastructure as Code (IaC) required to provision a hardened Windows Server 2025 Domain Controller within a private Azure Virtual Network. The primary objective was to replace manual "Click-Ops" with a repeatable, version-controlled deployment pipeline.
 
 ### Environment & Tools
@@ -18,7 +18,7 @@ This repository contains the Infrastructure as Code (IaC) required to provision 
 
 ---
 
-## 🏗️ Technical Architecture
+## Technical Architecture
 
 ### 1. Network Perimeter & Security
 * **VNet/Subnet:** Isolated `10.0.0.0/16` network with a dedicated AD subnet.
@@ -70,3 +70,7 @@ From here, the server was a blank slate, mirroring the exact starting point of m
 - **State Management (`.tfstate`):** Gained a practical understanding of how Terraform tracks the real-world state of cloud resources against the local configuration files to ensure idempotency.
 - **Dynamic Outputs:** Learned how to leverage Terraform outputs to streamline post-deployment workflows, completely eliminating the need to dig through the Azure portal to find dynamic public IP addresses.
 - **Cloud Networking vs. Local Networking:** Transitioned my understanding of VirtualBox NAT/Internal networks into enterprise cloud networking concepts (Azure VNets, Subnets, and Network Security Groups).
+
+---
+
+**[View the Terraform Configuration](./main.tf)**
