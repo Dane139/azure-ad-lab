@@ -4,44 +4,38 @@
 
 *This project covers the automated cloud deployment of an Active Directory environment. To see the foundational, on-premises manual configuration that preceded this automation, check out* [Active Directory Home Lab: Windows Server 2025](https://github.com/Dane139/ad-home-lab)
 
-### Objective
-
-After manually deploying and configuring a local Active Directory environment, the goal of this project was to transition from localized hypervisor provisioning to **Infrastructure as Code (IaC)**. By utilizing Terraform and Microsoft Azure, I architected a deployment pipeline to programmatically build an enterprise-ready Windows Server 2025 domain controller. This project demonstrates the ability to translate manual administrative tasks into rapid, repeatable, and scalable cloud automation.
+## 🛠️ Implementation Overview
+This repository contains the Infrastructure as Code (IaC) required to provision a hardened Windows Server 2025 Domain Controller within a private Azure Virtual Network. The primary objective was to replace manual "Click-Ops" with a repeatable, version-controlled deployment pipeline.
 
 ### Environment & Tools
 
-- **Cloud Provider:** Microsoft Azure
-- **IaC Tool:** Terraform
-- **Scripting/CLI:** Azure CLI, PowerShell
-- **Code Editor:** Visual Studio Code
-- **OS:** Windows Server 2025 Datacenter
+* **Cloud Provider:** Microsoft Azure
+* **Provisioning:** Terraform (HCL)
+* **OS:** Windows Server 2025 Datacenter
+* **Identity:** Active Directory Domain Services (AD DS)
+
+![Architecture](./assets/ad-lab-thumb.jpg)
 
 ---
 
-### Step 1: Defining the Infrastructure (IaC)
+## 🏗️ Technical Architecture
 
-Rather than manually configuring networking and compute resources through a web portal, I defined the entire environment using HashiCorp Configuration Language (HCL). I created a modular file structure:
+### 1. Network Perimeter & Security
+* **VNet/Subnet:** Isolated `10.0.0.0/16` network with a dedicated AD subnet.
+* **NSG Hardening:** Implemented a baseline "Deny-All" inbound policy. RDP access (Port 3389) is programmatically restricted via Terraform variables to the administrator's specific Public IP.
+* **Bastion Host:** Architecture designed to support Azure Bastion, ensuring management traffic remains off the public internet.
 
-- **`main.tf`:** The core blueprint declaring the Azure Resource Group, Virtual Network (`10.0.0.0/16`), Subnet (`10.0.1.0/24`), Network Interface, and the VM itself.
-- **`variables.tf`:** Parameterized the deployment to ensure flexibility (e.g., region, VM size).
-- **`outputs.tf`:** Programmed Terraform to dynamically return the public IP address and a pre-formatted `mstsc` (RDP) command upon successful deployment.
-
----
-
-### Step 2: Securing the Deployment
-
-To adhere to security best practices, hardcoding credentials into the main configuration files was strictly avoided.
-
-- **Network Security Group (NSG):** Configured an inbound security rule allowing RDP traffic (Port 3389) *strictly* from my local public IP address, supported by a baseline deny-all rule.
-- **Secrets Management:** Created a local `terraform.tfvars` file to store the sensitive administrator password and my specific IP address.
-- **Version Control Security:** Implemented a `.gitignore` file to ensure the `.tfvars` file and local `.tfstate` files were never committed to public version control.
+### 2. Infrastructure as Code (IaC) Logic
+* **State Management:** Local `.tfstate` utilized for resource tracking and idempotency.
+* **Dependencies:** Leveraged `depends_on` blocks to ensure the Network Interface and Security Group associations were fully propagated before VM initialization to prevent promotion race conditions.
+* **Outputs:** Automated the generation of `mstsc` connection strings to streamline the post-provisioning handshake.
 
 
 ![Gitignore Setup in VS Code](assets/9E891863-F4F3-4DB4-AEA3-4533452F606C.png)
 
 ---
 
-### Step 3: Execution and Provisioning
+### 3. Execution and Provisioning
 
 With the Azure CLI authenticated, I initiated the standard Terraform workflow:
 
@@ -53,13 +47,20 @@ With the Azure CLI authenticated, I initiated the standard Terraform workflow:
 
 ---
 
-## Step 4: Verification and Server Configuration
+### 4. Verification and Server Configuration
 
 Using the automated RDP output command, I instantly connected to the newly provisioned Azure VM.
 
 From here, the server was a blank slate, mirroring the exact starting point of my previous manual lab. I was able to immediately open PowerShell and execute the AD DS role installation and domain promotion scripts, successfully bridging the gap between automated cloud infrastructure and manual systems administration. The slowest part was recreating the GPOs.
 
 ![Azure VM RDP Session](assets/image.png)
+
+---
+
+## Enterprise Scaling Roadmap
+1. **High Availability:** Implement an Availability Set with a secondary DC in a separate Fault Domain.
+2. **Key Vault Integration:** Replace `.tfvars` secrets with Azure Key Vault references via Managed Identity for zero-secret exposure.
+3. **Hybrid Connectivity:** Integration of a Site-to-Site VPN gateway to simulate a production-grade Hybrid Cloud environment.
 
 ---
 
